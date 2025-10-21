@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt-Bewertung für Schüler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f9f9fb;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .strategy-selector {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #555;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4F46E5;
+        }
+
+        .checklist {
+            background: #F3F4F6;
+            border-left: 3px solid #4F46E5;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .checklist h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #4F46E5;
+        }
+
+        .checklist ul {
+            list-style: none;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .checklist li::before {
+            content: "✓ ";
+            color: #10B981;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4F46E5;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #4338CA;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4F46E5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 2px solid #E5E7EB;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score-display {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .score-circle {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            line-height: 80px;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .score-label {
+            display: block;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .marked-text {
+            background: #FAFAFA;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .segment {
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin: 0 2px;
+        }
+
+        .segment.GOOD { background: #D1FAE5; color: #065F46; }
+        .segment.MISSING_DETAIL { background: #FEE2E2; color: #991B1B; }
+        .segment.UNCLEAR { background: #FEF3C7; color: #92400E; }
+        .segment.TOO_VAGUE { background: #FED7AA; color: #9A3412; }
+        .segment.OFF_TOPIC { background: #E5E7EB; color: #374151; }
+        .segment.TONE_ISSUE { background: #EDE9FE; color: #5B21B6; }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .problems, .tips {
+            list-style: none;
+        }
+
+        .problems li, .tips li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .problems li::before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+        }
+
+        .tips li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+
+        .improved-prompt {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .copy-button:hover {
+            background: #059669;
+        }
+
+        .error-message {
+            background: #FEE2E2;
+            color: #991B1B;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .rubrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .rubric-item {
+            background: #F9FAFB;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .rubric-label {
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .rubric-score {
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+
+            .rubrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prompt-Bewertung</h1>
+        <p class="subtitle">Verbessere deine Prompts mit KI-Feedback</p>
+
+        <div class="strategy-selector">
+            <label for="strategy">Wähle deine Lernstufe:</label>
+            <select id="strategy">
+                <option value="beginner_3w">Anfänger - Die 3 W-Fragen</option>
+                <option value="intermediate_kaf">Mittelstufe - Kontext + Aufgabe + Format</option>
+            </select>
+        </div>
+
+        <div class="checklist" id="checklist">
+            <!-- Wird dynamisch gefüllt -->
+        </div>
+
+        <div>
+            <label for="prompt">Dein Prompt:</label>
+            <textarea id="prompt" placeholder="Schreibe hier deinen Prompt..."></textarea>
+            <div class="char-count"><span id="charCount">0</span> Zeichen</div>
+        </div>
+
+        <button id="evaluateBtn" onclick="evaluatePrompt()">Prompt bewerten</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Bewertung läuft...</p>
+        </div>
+
+        <div class="error-message" id="error"></div>
+
+        <div class="results" id="results">
+            <div class="score-display">
+                <div class="score-circle" id="scoreCircle">--</div>
+                <span class="score-label">Gesamtbewertung</span>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #D1FAE5;"></div>
+                    <span>Gut</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FEE2E2;"></div>
+                    <span>Fehlende Details</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FEF3C7;"></div>
+                    <span>Unklar</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FED7AA;"></div>
+                    <span>Zu vage</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #E5E7EB;"></div>
+                    <span>Thema verfehlt</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #EDE9FE;"></div>
+                    <span>Ton-Problem</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Dein Prompt mit Markierungen:</h3>
+                <div class="marked-text" id="markedText"></div>
+            </div>
+
+            <div class="section">
+                <h3>Gefundene Probleme:</h3>
+                <ul class="problems" id="problems"></ul>
+            </div>
+
+            <div class="section">
+                <h3>Verbesserungstipps:</h3>
+                <ul class="tips" id="tips"></ul>
+            </div>
+
+            <div class="section">
+                <h3>Verbesserter Prompt:</h3>
+                <div class="improved-prompt">
+                    <button class="copy-button" onclick="copyImprovedPrompt()">Kopieren</button>
+                    <div id="improvedPrompt"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Detailbewertung:</h3>
+                <div class="rubrics" id="rubrics"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const checklists = {
+            beginner_3w: {
+                title: '3 W-Fragen Checkliste:',
+                items: [
+                    'Was will ich? (Ziel klar beschreiben)',
+                    'Wie soll es sein? (Stil, Ton, Länge oder Format angeben)',
+                    'Warum brauche ich es? (Anlass oder Zweck nennen)'
+                ]
+            },
+            intermediate_kaf: {
+                title: 'Kontext + Aufgabe + Format Checkliste:',
+                items: [
+                    'Kontext: Wer bin ich, für wen ist es, welche Situation?',
+                    'Aufgabe: Präzise Handlungsanweisung mit klaren Erwartungen',
+                    'Format: Struktur, Länge, Ton und Darstellung festlegen'
+                ]
+            }
+        };
+
+        // Update checklist on strategy change
+        document.getElementById('strategy').addEventListener('change', updateChecklist);
+        
+        // Character counter
+        document.getElementById('prompt').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        // Initialize checklist
+        updateChecklist();
+
+        function updateChecklist() {
+            const strategy = document.getElementById('strategy').value;
+            const checklist = checklists[strategy];
+            const checklistDiv = document.getElementById('checklist');
+            
+            checklistDiv.innerHTML = `
+                <h3>${checklist.title}</h3>
+                <ul>
+                    ${checklist.items.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        async function evaluatePrompt() {
+            const prompt = document.getElementById('prompt').value.trim();
+            const strategy = document.getElementById('strategy').value;
+            
+            if (!prompt) {
+                showError('Bitte gib einen Prompt ein.');
+                return;
+            }
+
+            if (prompt.length < 10) {
+                showError('Der Prompt ist zu kurz. Bitte schreibe mindestens 10 Zeichen.');
+                return;
+            }
+
+            // UI states
+            document.getElementById('evaluateBtn').disabled = true;
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('error').classList.remove('active');
+
+            try {
+                const response = await fetch('/api/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        student_prompt: prompt,
+                        strategy: strategy
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server-Fehler: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                displayResults(data);
+            } catch (error) {
+                console.error('Fehler:', error);
+                showError('Es gab einen Fehler bei der Bewertung. Bitte versuche es später erneut.');
+            } finally {
+                document.getElementById('evaluateBtn').disabled = false;
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function displayResults(data) {
+            // Score with color
+            const scoreElement = document.getElementById('scoreCircle');
+            scoreElement.textContent = data.overall_score;
+            
+            if (data.overall_score >= 80) {
+                scoreElement.style.background = '#10B981';
+            } else if (data.overall_score >= 60) {
+                scoreElement.style.background = '#F59E0B';
+            } else if (data.overall_score >= 40) {
+                scoreElement.style.background = '#EF4444';
+            } else {
+                scoreElement.style.background = '#991B1B';
+            }
+
+            // Marked text
+            const markedTextDiv = document.getElementById('markedText');
+            markedTextDiv.innerHTML = data.segments.map(segment => 
+                `<span class="segment ${segment.label}">${escapeHtml(segment.text)}</span>`
+            ).join(' ');
+
+            // Problems
+            const problemsList = document.getElementById('problems');
+            problemsList.innerHTML = data.problems.map(problem => 
+                `<li>${escapeHtml(problem)}</li>`
+            ).join('');
+
+            // Tips
+            const tipsList = document.getElementById('tips');
+            tipsList.innerHTML = data.tips.map(tip => 
+                `<li>${escapeHtml(tip)}</li>`
+            ).join('');
+
+            // Improved prompt
+            document.getElementById('improvedPrompt').textContent = data.improved_prompt;
+
+            // Rubrics
+            const rubricsDiv = document.getElementById('rubrics');
+            rubricsDiv.innerHTML = `
+                <div class="rubric-item">
+                    <div class="rubric-label">Klarheit & Präzision</div>
+                    <div class="rubric-score">${data.rubric_scores.clarity}/25</div>
+                </div>
+                <div class="rubric-item">
+                    <div class="rubric-label">Struktur & Strategie</div>
+                    <div class="rubric-score">${data.rubric_scores.structure}/25</div>
+                </div>
+                <div class="rubric-item">
+                    <div class="rubric-label">Aufgaben-Spezifität</div>
+                    <div class="rubric-score">${data.rubric_scores.task_specificity}/25</div>
+                </div>
+                <div class="rubric-item">
+                    <div class="rubric-label">Zielgruppe & Ton</div>
+                    <div class="rubric-score">${data.rubric_scores.audience_tone}/25</div>
+                </div>
+            `;
+
+            // Show results
+            document.getElementById('results').classList.add('active');
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyImprovedPrompt() {
+            const text = document.getElementById('improvedPrompt').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const button = document.querySelector('.copy-button');
+                const originalText = button.textContent;
+                button.textContent = 'Kopiert!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+            setTimeout(() => {
+                errorDiv.classList.remove('active');
+            }, 5000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

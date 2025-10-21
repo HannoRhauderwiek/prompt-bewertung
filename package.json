@@ -1,0 +1,20 @@
+{
+  "name": "prompt-bewertung",
+  "version": "1.0.0",
+  "description": "Web-App zur automatischen Bewertung von Schüler-Prompts mit Claude AI",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build needed'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1"
+  },
+  "devDependencies": {
+    "vercel": "^37.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
