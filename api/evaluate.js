@@ -5,7 +5,7 @@
 // - Saubere Validierung + verständliche Fehlermeldungen
 // - JSON-only Antwort-Parsing (auch wenn die KI Code-Fences zurückgibt)
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-latest'; // bei Bedarf per Env-Var ändern
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-4-5-haiku-latest'; // bei Bedarf per Env-Var ändern
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
