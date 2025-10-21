@@ -1,4 +1,6 @@
 {
+  "buildCommand": "mkdir -p public && cp index.html public/",
+  "outputDirectory": "public",
   "functions": {
     "api/evaluate.js": {
       "maxDuration": 30
