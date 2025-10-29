@@ -209,36 +209,66 @@
         }
 
         .segment {
-            padding: 2px 4px;
-            border-radius: 3px;
+            padding: 3px 6px;
+            border-radius: 4px;
             margin: 0 2px;
+            font-weight: 500;
         }
 
-        .segment.GOOD { background: #D1FAE5; color: #065F46; }
-        .segment.MISSING_DETAIL { background: #FEE2E2; color: #991B1B; }
-        .segment.UNCLEAR { background: #FEF3C7; color: #92400E; }
-        .segment.TOO_VAGUE { background: #FED7AA; color: #9A3412; }
-        .segment.OFF_TOPIC { background: #E5E7EB; color: #374151; }
-        .segment.TONE_ISSUE { background: #EDE9FE; color: #5B21B6; }
+        .segment.GOOD {
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            color: #065F46;
+            border: 1px solid #6EE7B7;
+        }
+        .segment.UNCLEAR {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            color: #92400E;
+            border: 1px solid #FCD34D;
+        }
+        .segment.INCOMPLETE {
+            background: linear-gradient(135deg, #FECACA 0%, #FCA5A5 100%);
+            color: #991B1B;
+            border: 1px solid #F87171;
+        }
+        .segment.PROBLEMATIC {
+            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+            color: #3730A3;
+            border: 1px solid #A5B4FC;
+        }
 
         .legend {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 16px;
             margin-bottom: 24px;
-            font-size: 12px;
+            padding: 16px;
+            background: #F9FAFB;
+            border-radius: 8px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
         }
 
         .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .section {
@@ -393,28 +423,20 @@
 
             <div class="legend">
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #D1FAE5;"></div>
-                    <span>Gut</span>
+                    <div class="legend-color" style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); border: 1px solid #6EE7B7;"></div>
+                    <span>✓ Gut</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #FEE2E2;"></div>
-                    <span>Fehlende Details</span>
+                    <div class="legend-color" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border: 1px solid #FCD34D;"></div>
+                    <span>? Unklar</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #FEF3C7;"></div>
-                    <span>Unklar</span>
+                    <div class="legend-color" style="background: linear-gradient(135deg, #FECACA 0%, #FCA5A5 100%); border: 1px solid #F87171;"></div>
+                    <span>! Unvollständig</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #FED7AA;"></div>
-                    <span>Zu vage</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #E5E7EB;"></div>
-                    <span>Thema verfehlt</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #EDE9FE;"></div>
-                    <span>Ton-Problem</span>
+                    <div class="legend-color" style="background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%); border: 1px solid #A5B4FC;"></div>
+                    <span>✗ Problematisch</span>
                 </div>
             </div>
 

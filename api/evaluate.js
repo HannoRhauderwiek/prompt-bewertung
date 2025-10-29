@@ -30,12 +30,18 @@ Antworte **AUSSCHLIESSLICH** mit einem **g체ltigen JSON-Objekt** (keine Code-Bl�
 Schema (alle Schl체ssel exakt verwenden):
 {
   "overall_score": number 0..100,
-  "segments": [{ "text": string, "label": "GOOD" | "OK" | "UNCLEAR" | "OFF_TOPIC" }],
+  "segments": [{ "text": string, "label": "GOOD" | "UNCLEAR" | "INCOMPLETE" | "PROBLEMATIC" }],
   "problems": string[],   // kurze Problem-Liste
   "tips": string[],       // konkrete, umsetzbare Tipps
   "improved_prompt": string, // verbesserte deutsche Version
   "rubric_scores": { "clarity": 0..25, "structure": 0..25, "task_specificity": 0..25, "audience_tone": 0..25 }
 }
+
+Label-Bedeutungen:
+- GOOD: Klar, pr채zise, gut formuliert
+- UNCLEAR: Unklar oder zu vage formuliert
+- INCOMPLETE: Fehlende wichtige Details oder Informationen
+- PROBLEMATIC: Thema verfehlt, unpassender Ton oder andere Probleme
 
 Bewertungsregeln:
 - "overall_score" ist Summe der rubric_scores (0..100).
@@ -185,7 +191,7 @@ module.exports = async (req, res) => {
       // Fallback: minimale sinnvolle Struktur zur체ckgeben
       evaluation = {
         overall_score: 50,
-        segments: [{ text: student_prompt, label: 'UNCLEAR' }],
+        segments: [{ text: student_prompt, label: 'INCOMPLETE' }],
         problems: ['Die Bewertung konnte nicht vollst채ndig analysiert werden.'],
         tips: [
           'Formuliere klarer, was genau du brauchst.',
